@@ -7,13 +7,14 @@ import {
   deleteChatById,
 } from '../../helpers/apiCommunicators';
 import { ClipLoader } from 'react-spinners';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './index.css';
 
 interface Session {
   lastMessage: string;
   sessionTime: Date;
   sessionId: string;
+  chats: unknown[]; // Replace 'unknown' with the actual chat type if available
 }
 
 const getChatHistory = async () => {
@@ -35,19 +36,30 @@ const formatVideoAge = (sessionTime: Date) => {
 
 interface HistoryPageItemProps extends Session {
   deleteSessionById: (sessionId: string) => void;
+  getChatSessionById: (sessionId: string) => void;
 }
 
 const historyPageItemContainer = (props: HistoryPageItemProps) => {
-  const { lastMessage, sessionTime, sessionId, deleteSessionById } = props;
+  const {
+    lastMessage,
+    sessionTime,
+    sessionId,
+    deleteSessionById,
+    getChatSessionById,
+  } = props;
   const formattedAge = formatVideoAge(sessionTime);
 
   const auth = UserAuth() || null;
   const { isDarkMode } = auth || {};
   const darkClass = isDarkMode ? 'dark' : '';
+
   return (
     <>
       <li className={`history-item ${darkClass}`} key={sessionId}>
-        <div className="history-item-content">
+        <div
+          className="history-item-content"
+          onClick={() => getChatSessionById(sessionId)}
+        >
           <p className="history-msg">{lastMessage}</p>
           <p className="history-time">{formattedAge}</p>
         </div>
@@ -64,6 +76,21 @@ const historyPageItemContainer = (props: HistoryPageItemProps) => {
 };
 
 export const HistoryPageList = () => {
+  const navigate = useNavigate();
+
+  const getChatSessionById = (sessionId: string) => {
+    const chatHistoryString = localStorage.getItem('chatHistory');
+    const chatHistory = chatHistoryString && JSON.parse(chatHistoryString);
+    const filteredChat = (chatHistory as Session[]).filter(
+      (each: Session) => each.sessionId === sessionId
+    );
+
+    const { chats, sessionId: filteredSessionId } = filteredChat[0];
+    localStorage.setItem('currentChatList', JSON.stringify(chats));
+    localStorage.setItem('currentSessionId', JSON.stringify(filteredSessionId));
+    navigate('/chat');
+  };
+
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -74,6 +101,13 @@ export const HistoryPageList = () => {
   };
 
   const deleteSessionById = async (sessionId: string) => {
+    const currentSessionIdString = localStorage.getItem('currentSessionId');
+    const currentSession =
+      currentSessionIdString && JSON.parse(currentSessionIdString);
+    if (sessionId === currentSession) {
+      localStorage.removeItem('currentSessionId');
+      localStorage.removeItem('currentChatList');
+    }
     await deleteChatById(sessionId);
     fetchHistory();
   };
@@ -96,7 +130,11 @@ export const HistoryPageList = () => {
         </div>
       ) : chatHistory && chatHistory.length > 0 ? (
         chatHistory.map((each: Session) =>
-          historyPageItemContainer({ ...each, deleteSessionById })
+          historyPageItemContainer({
+            ...each,
+            deleteSessionById,
+            getChatSessionById,
+          })
         )
       ) : (
         <div className="no-history">

@@ -22,6 +22,8 @@ const Header = (props: Props) => {
     Cookies.remove('jwt_token');
     localStorage.removeItem('userDetails');
     localStorage.removeItem('chatHistory');
+    localStorage.removeItem('currentSessionId');
+    localStorage.removeItem('currentChatList');
     navigate('/login');
   };
   const [modalIsOpen, setModalIsOpen] = useState(false);

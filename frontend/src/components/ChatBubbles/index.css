@@ -3,6 +3,7 @@
   flex-direction: column;
   max-width: 80%;
   margin: auto;
+  overflow-y: auto;
 }
 
 .chat-bubble {

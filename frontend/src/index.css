@@ -42,6 +42,7 @@ input {
 /* Style for the entire scrollbar */
 ::-webkit-scrollbar {
   width: 8px; /* For vertical scrollbar */
+  height: 8px;
   
 }
 

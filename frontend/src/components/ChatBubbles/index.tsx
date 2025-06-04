@@ -9,7 +9,7 @@ interface ChatItem {
 }
 
 interface Props {
-  chats: ChatItem;
+  chats: ChatItem[];
 }
 
 const ChatBubbles = ({ chats }: Props) => {

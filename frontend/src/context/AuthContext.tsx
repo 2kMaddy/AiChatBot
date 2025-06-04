@@ -7,7 +7,7 @@ type Chat = {
 };
 
 type ChatsList = {
-  chats: [Chat];
+  chats: Chat[];
 };
 
 type UserAuth = {
@@ -23,8 +23,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [chatsList, setChatsList] = useState<ChatsList | null>(null);
 
-  const changeChatsList = (chats: ChatsList) => {
-    setChatsList(chats);
+  const changeChatsList = (newChats: ChatsList) => {
+    setChatsList((prev) => {
+      if (prev) {
+        return { chats: [...prev.chats, ...newChats.chats] };
+      } else {
+        return { chats: [...newChats.chats] };
+      }
+    });
   };
 
   const toggleDarkMode = () => {

@@ -6,25 +6,43 @@ import Navbar from '../Navbar';
 import { UserAuth } from '../../context/AuthContext';
 import { getResponseFromGemini } from '../../helpers/apiCommunicators';
 import ChatBubbles from '../ChatBubbles';
+import { GoPlus } from 'react-icons/go';
 import './index.css';
 
 const ChatPage = () => {
+  const getCurrentSessionId = () => {
+    const localSessionIdString = localStorage.getItem('currentSessionId');
+    const localSessionId = localSessionIdString
+      ? JSON.parse(localSessionIdString)
+      : null;
+    return localSessionId;
+  };
+
   const auth = UserAuth() || null;
   const { isDarkMode } = auth || {};
   const darkClass = isDarkMode ? 'dark' : '';
-  const [activeSessionId, setActiveSessionId] = useState('newChat');
+  const [activeSessionId, setActiveSessionId] = useState(
+    getCurrentSessionId() || 'newChat'
+  );
   type ChatMessage = {
     sender: 'user' | 'ai';
     message: string;
-    timestamp?: Date;
+    timestamp: Date;
   };
 
-  const [chats, setChats] = useState<ChatMessage[]>([]);
+  const getCurrentChatFromLocal = () => {
+    const localChatString = localStorage.getItem('currentChatList');
+    const localChatList = localChatString ? JSON.parse(localChatString) : null;
+    return localChatList;
+  };
+
+  const [chats, setChats] = useState<ChatMessage[]>(
+    getCurrentChatFromLocal() || []
+  );
   const [userPrompt, setUserPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
@@ -36,17 +54,17 @@ const ChatPage = () => {
 
   useEffect(() => {
     scrollToBottom();
+    localStorage.setItem('currentChatList', JSON.stringify(chats));
   }, [chats]);
 
   const submitPrompt = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newChat = {
+    const newChat: ChatMessage = {
       sender: 'user',
       message: userPrompt,
       timestamp: new Date(),
     };
     setChats((prevChats) => [...prevChats, newChat]);
-    console.log(chats);
     setUserPrompt('');
     setIsLoading(true);
     if (!userPrompt.trim()) {
@@ -54,7 +72,7 @@ const ChatPage = () => {
     }
     const response = await getResponseFromGemini(userPrompt, activeSessionId);
 
-    const aiResponse = {
+    const aiResponse: ChatMessage = {
       sender: 'ai',
       message: response.message || 'No response from AI',
       timestamp: new Date(),
@@ -64,11 +82,20 @@ const ChatPage = () => {
     setIsLoading(false);
   };
 
-  const handleTextareaSubmit = (e: any) => {
+  const handleTextareaSubmit = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
     if (e.code === 'Enter') {
       console.log(e.code);
       submitPrompt(e);
     }
+  };
+
+  const newChat = () => {
+    setActiveSessionId('newChat');
+    localStorage.removeItem('currentChatList');
+    setChats([]);
+    localStorage.removeItem('currectSessionId');
   };
 
   return (
@@ -90,10 +117,17 @@ const ChatPage = () => {
             <textarea
               placeholder="Ask me anything..."
               value={userPrompt}
-              className="user-prompt-input"
+              className={`user-prompt-input ${darkClass}`}
               onChange={(e) => setUserPrompt(e.target.value)}
               onKeyDown={handleTextareaSubmit}
             />
+            <button
+              type="button"
+              className={`new-chat-btn ${darkClass}`}
+              onClick={newChat}
+            >
+              <GoPlus />
+            </button>
             {isLoading ? (
               <div className="loader-btn">
                 <MoonLoader

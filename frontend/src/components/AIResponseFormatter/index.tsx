@@ -1,15 +1,24 @@
 import React from 'react';
-import Markdown from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/atom-one-dark.css';
 import remarkGfm from 'remark-gfm';
 
 interface AiResponseFormatterProps {
-  rawResponse: string; // The raw text string received from the AI chatbot
+  rawResponse: string;
 }
 
 const AiResponseFormatter: React.FC<AiResponseFormatterProps> = ({
   rawResponse,
 }) => {
-  return <Markdown remarkPlugins={[remarkGfm]}>{rawResponse}</Markdown>;
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeHighlight]}
+    >
+      {rawResponse}
+    </ReactMarkdown>
+  );
 };
 
 export default AiResponseFormatter;

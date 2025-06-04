@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 
-const baseAPIURL = 'http://localhost:4000/api';
+const baseAPIURL = 'https://aichatbot-gemini-1.onrender.com/api';
 const token = Cookies.get('jwt_token');
 
 const saveUserDataLocal = (
