@@ -2,7 +2,7 @@
 
 A full-stack AI chatbot application built using the **MERN stack** (MongoDB, Express, React, Node.js) integrated with **Gemini AI**, offering a clean interface, dark mode, authentication, and persistent user chat history.
 
-🚀 **Live Demo**: [ai-chat-bot-gemini-m337.vercel.app](https://ai-chat-bot-gemini-m337.vercel.app/)
+🚀 **Live Demo**: [ai-chat-bot-rose-chi.vercel.app/](https://ai-chat-bot-rose-chi.vercel.app/)
 
 ---
 
